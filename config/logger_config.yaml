@@ -1,0 +1,53 @@
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  standard:
+    format: "[%(asctime)s] %(name)s {%(module)s-%(lineno)d} %(levelname)s - %(message)s"
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  standard_process:
+    format: "[%(asctime)s] %(process)d %(name)s {%(module)s-%(lineno)d} %(levelname)s - %(message)s"
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  simple:
+    format: "[%(asctime)s] {%(module)s} %(levelname)s - %(message)s"
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  full:
+    format: "[%(asctime)s] {%(pathname)s:(%(module)s)-%(lineno)d} %(levelname)s - %(message)s"
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  minimal:
+    format: "%(asctime)s, %(message)s"
+    datefmt: '%Y-%m-%d %H:%M:%S'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: standard_process
+    stream: ext://sys.stderr
+  file_info:
+    (): src.logger.process_aware_timed_rotating_file_handler.ProcessAwareTimedRotatingFileHandler
+    when: midnight
+    level: INFO
+    formatter: standard_process
+    filename: ./logs/info.log
+    # maxBytes: 10485760 # 10MB
+    backupCount: 14
+    encoding: utf8
+#  file_error:
+#    class: logging.handlers.TimedRotatingFileHandler
+#    when: midnight
+#    level: ERROR
+#    formatter: standard_process
+#    filename: ./logs/error.log
+#    # maxBytes: 10485760 # 10MB
+#    backupCount: 14
+#    encoding: utf8
+
+root:
+  level: INFO
+  handlers: [ console, file_info ]
+#loggers:
+#  "src":
+#    level: INFO
+#    handlers: [ file_info, console ]
+#    propagate: no
