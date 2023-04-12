@@ -1,0 +1,2 @@
+class ImagePredictor:
+    pass

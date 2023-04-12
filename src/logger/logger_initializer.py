@@ -1,6 +1,7 @@
 import datetime
 import logging
 import logging.config
+import os
 from pathlib import Path
 from typing import Any, Dict
 
@@ -42,5 +43,7 @@ class LoggerInitializer(Monostate):
     def init(self):
         if not self.has_init:
             self._init_logger()
+            pid = os.getpid()
+            logging.info(f'Current process ID: {pid}')
             self.has_init = True
         return self.has_init
