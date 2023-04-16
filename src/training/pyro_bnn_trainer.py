@@ -29,7 +29,12 @@ class PyroBnnTrainer(ModelTrainer):
 
     def _create_loss_criterion(self, model, loss_function):
         optimizer = self._get_optimizer(model)
-        svi = pyro.infer.SVI(model.model, model.guide, optimizer, loss_function)
+        svi = pyro.infer.SVI(
+            model.model,
+            model.guide,
+            optimizer,
+            loss_function,
+        )
         return svi
 
     def _get_predictor(self, model, dataloader: DataLoader, device: str):

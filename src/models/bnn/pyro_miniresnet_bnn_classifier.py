@@ -4,18 +4,19 @@ import pyro
 
 from src.common.model_creator import ModelCreator
 from src.common.pyro_image_classifier import PyroImageClassifier
-from src.model_creation.pyro_resnet18_bnn_creator import PyroResnet18BnnCreator
+from src.model_creation.pyro_miniresnet_bnn_creator import \
+    PyroMiniresnetBnnCreator
 
 
-class PyroResnet18BnnClassifier(PyroImageClassifier):
+class PyroMiniresnetBnnClassifier(PyroImageClassifier):
 
     @property
     def name(self) -> str:
-        return 'pyro_resnet18bnn'
+        return 'pyro_miniresnet'
 
     @property
     def model_creator_class(self) -> Type[ModelCreator]:
-        return PyroResnet18BnnCreator
+        return PyroMiniresnetBnnCreator
 
     def _get_loss_criterion(self):
         return pyro.infer.Trace_ELBO(
