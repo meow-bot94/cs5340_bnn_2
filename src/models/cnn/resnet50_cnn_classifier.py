@@ -1,5 +1,6 @@
 from typing import Type
 
+from torch import nn, optim
 from torch.utils.data import DataLoader
 
 from src.common.image_classifier import ImageClassifier
@@ -15,13 +16,21 @@ class Resnet50CnnClassifier(ImageClassifier):
     def name(self) -> str:
         return 'resnet50cnn'
 
+    def _get_loss_criterion(self):
+        return nn.CrossEntropyLoss()
+
     @property
     def model_creator_class(self) -> Type[ModelCreator]:
         return Resnet50CnnCreator
 
     def _fit(self, num_epoch: int, verbose):
         assert self._model is not None, 'Model not initiated. Run init first.'
-        trainer = CnnTrainer(self._model, self._dataset, self._device)
+        trainer = CnnTrainer(
+            self._model,
+            self._dataset,
+            self._get_loss_criterion(),
+            self._device,
+        )
         return trainer.train(num_epoch, verbose)
 
     def predict(self, dataloader: DataLoader):
