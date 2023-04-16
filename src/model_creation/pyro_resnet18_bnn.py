@@ -56,15 +56,14 @@ class PyroResnet18Bnn(pyro.nn.PyroModule):
         # prior definition
         for m in model.modules():
             if isinstance(m, (nn.Linear, nn.Conv2d)):
-                # print(f'{m=}')
                 m.weight = pyro.nn.PyroSample(pyro.distributions.Normal(
-                    torch.zeros_like(m.weight, device=device),
-                    torch.ones_like(m.weight, device=device)
+                    m.weight,
+                    torch.full_like(m.weight, 1e-3, device=device)
                 ).to_event())
                 if m.bias is not None:
                     m.bias = pyro.nn.PyroSample(pyro.distributions.Normal(
-                        torch.zeros_like(m.bias, device=device),
-                        torch.ones_like(m.bias, device=device)
+                        m.bias,
+                        torch.full_like(m.bias, 1e-3, device=device)
                     ).to_event())
 
     def _create_pyro_resnet(self, dataset: Dataset, device: str):

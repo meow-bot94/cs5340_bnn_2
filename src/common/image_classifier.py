@@ -83,3 +83,11 @@ class ImageClassifier(ABC):
             self._init()
         self._load_model(*args, **kwargs)
         return self
+
+    def freeze_all_layers(self):
+        for param in self._model.parameters():
+            param.requires_grad = False
+
+    def unfreeze_all_layers(self):
+        for param in self._model.parameters():
+            param.requires_grad = True

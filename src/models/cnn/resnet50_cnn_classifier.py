@@ -18,3 +18,12 @@ class Resnet50CnnClassifier(CnnImageClassifier):
     @property
     def model_creator_class(self) -> Type[ModelCreator]:
         return Resnet50CnnCreator
+
+    def unfreeze_fc_layer(self):
+        for param in self._model.fc.parameters():
+            param.requires_grad = True
+
+    def freeze_all_layers_except_fc(self):
+        self.freeze_all_layers()
+        self.unfreeze_fc_layer()
+
