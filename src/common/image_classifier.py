@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 
 from src.common.model_creator import ModelCreator
 from src.data_loader.dataset import Dataset
+from src.scoring.class_scorer import ClassScorer
 from src.utils.path_getter import PathGetter
 
 
@@ -48,6 +49,10 @@ class ImageClassifier(ABC):
         return self
 
     @abstractmethod
+    def _get_loss_criterion(self):
+        pass
+
+    @abstractmethod
     def _fit(self, num_epoch: int, verbose) -> Tuple[pd.DataFrame, Dict]:
         pass
 
@@ -58,9 +63,9 @@ class ImageClassifier(ABC):
     def predict(self, dataloader: DataLoader):
         pass
 
-    @abstractmethod
     def score(self, dataloader: DataLoader):
-        pass
+        y_true, y_pred = self.predict(dataloader)
+        return ClassScorer.score(y_true, y_pred)
 
     def save_model(self, result_dict: Dict):
         process_id = os.getpid()
