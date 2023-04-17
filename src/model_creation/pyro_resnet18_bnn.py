@@ -4,6 +4,7 @@ import pyro.nn
 import torch
 import torchvision
 from pyro.distributions import Categorical
+from pyro.infer.autoguide import AutoNormal
 from torch import nn
 
 from src.data_loader.dataset import Dataset
@@ -30,7 +31,7 @@ class PyroResnet18Bnn(pyro.nn.PyroModule):
 
     def _get_guide(self):
         values = self._resnet.state_dict()
-        guide = pyro.infer.autoguide.AutoNormal(
+        guide = AutoNormal(
             self.model, init_scale=1e-4,
             init_loc_fn=pyro.infer.autoguide.init_to_value(values=values)
         )
