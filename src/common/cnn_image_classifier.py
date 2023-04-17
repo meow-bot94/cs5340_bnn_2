@@ -21,3 +21,7 @@ class CnnImageClassifier(ImageClassifier):
 
     def _load_model(self, model_state_dict: dict):
         self._model.load_state_dict(model_state_dict)
+
+    def unfreeze_layer(self, layer_name: str):
+        for param in getattr(self._model, layer_name).parameters():
+            param.requires_grad = True

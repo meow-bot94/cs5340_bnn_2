@@ -20,8 +20,7 @@ class Resnet18CnnClassifier(CnnImageClassifier):
         return Resnet18CnnCreator
 
     def unfreeze_fc_layer(self):
-        for param in self._model.fc.parameters():
-            param.requires_grad = True
+        self.unfreeze_layer('fc')
 
     def freeze_all_layers_except_fc(self):
         self.freeze_all_layers()

@@ -26,11 +26,13 @@ class PyroResnet18BnnClassifier(PyroImageClassifier):
     def num_samples(self) -> int:
         return 10
 
+    def unfreeze_layer(self, layer_name: str):
+        for param in getattr(self._model._resnet, layer_name).parameters():
+            param.requires_grad = True
+
     def unfreeze_fc_layer(self):
-        for param in self._model._resnet.fc.parameters():
-            param.requires_grad = True
-        for param in self._model._resnet.logsoftmax.parameters():
-            param.requires_grad = True
+        self.unfreeze_layer('fc')
+        self.unfreeze_layer('logsoftmax')
 
     def freeze_all_layers_except_fc(self):
         self.freeze_all_layers()
