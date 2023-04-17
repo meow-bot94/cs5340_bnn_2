@@ -39,10 +39,8 @@ class PyroMiniresnetBnn(pyro.nn.PyroModule):
 
     def _create_resnet(self, dataset: Dataset, device: str):
         resnet = ResNet(
-            BasicBlock, [1, 1, 1, 1], 6
+            BasicBlock, [1, 1, 1, 1], dataset.num_classes
         )
-        for param in resnet.parameters():
-            param.requires_grad = False
         resnet.add_module('logsoftmax', nn.LogSoftmax(dim=1))
         resnet.to(device)
         return resnet

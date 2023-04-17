@@ -57,16 +57,8 @@ class PyroResnet18Bnn(pyro.nn.PyroModule):
         resnet.to(device)
         return resnet
 
-    def _convert_torch_to_pyro(self, model, dataset: Dataset, device: str):
+    def _convert_torch_to_pyro(self, model, device: str):
         pyro.nn.module.to_pyro_module_(model)
-
-        # Repeated declaration despite above to ensure params go into pyro
-        model.fc = pyro.nn.PyroModule[nn.Linear](
-            torch.tensor(model.fc[0].in_features, device=device),
-            torch.tensor(dataset.num_classes, device=device),
-            bias=True,
-            device=device
-        )
 
         # prior definition
         for module_name, m in model.named_modules():
@@ -83,5 +75,5 @@ class PyroResnet18Bnn(pyro.nn.PyroModule):
 
     def _create_pyro_resnet(self, dataset: Dataset, device: str):
         resnet = self._create_resnet(dataset, device)
-        self._convert_torch_to_pyro(resnet, dataset, device)
+        self._convert_torch_to_pyro(resnet, device)
         return resnet
