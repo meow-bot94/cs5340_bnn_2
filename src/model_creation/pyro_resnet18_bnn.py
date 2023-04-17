@@ -44,17 +44,32 @@ class PyroResnet18Bnn(pyro.nn.PyroModule):
             param.requires_grad = False
         resnet.class_to_idx = dataset.class_to_idx
         resnet.idx_to_class = dataset.idx_to_class
-        resnet.fc = nn.Linear(
-            resnet.fc.in_features, dataset.num_classes, bias=True)
+        resnet.fc = nn.Sequential(
+            nn.Linear(
+                resnet.fc.in_features,
+                dataset.num_classes,
+                bias=True,
+            )
+        )
         resnet.add_module('logsoftmax', nn.LogSoftmax(dim=1))
+        resnet.fc.requires_grad = True
+        resnet.logsoftmax.requires_grad = True
         resnet.to(device)
         return resnet
 
-    def _convert_torch_to_pyro(self, model, device: str):
+    def _convert_torch_to_pyro(self, model, dataset: Dataset, device: str):
         pyro.nn.module.to_pyro_module_(model)
 
+        # Repeated declaration despite above to ensure params go into pyro
+        model.fc = pyro.nn.PyroModule[nn.Linear](
+            torch.tensor(model.fc[0].in_features, device=device),
+            torch.tensor(dataset.num_classes, device=device),
+            bias=True,
+            device=device
+        )
+
         # prior definition
-        for m in model.modules():
+        for module_name, m in model.named_modules():
             if isinstance(m, (nn.Linear, nn.Conv2d)):
                 m.weight = pyro.nn.PyroSample(pyro.distributions.Normal(
                     m.weight,
@@ -68,5 +83,5 @@ class PyroResnet18Bnn(pyro.nn.PyroModule):
 
     def _create_pyro_resnet(self, dataset: Dataset, device: str):
         resnet = self._create_resnet(dataset, device)
-        self._convert_torch_to_pyro(resnet, device)
+        self._convert_torch_to_pyro(resnet, dataset, device)
         return resnet
