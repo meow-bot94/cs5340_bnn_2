@@ -1,3 +1,5 @@
+from typing import Dict
+
 import pyro
 from torch.utils.data import DataLoader
 
@@ -18,8 +20,46 @@ class PyroBnnTrainer(ModelTrainer):
         self._num_samples = num_samples
         super().__init__(model, dataset, loss_criterion, device)
         self._loss_function = loss_criterion
-        self._loss_criterion = self._create_loss_criterion(self._model,
-                                                           self._loss_function)
+        self._loss_criterion = self._create_loss_criterion(
+            self._model,
+            self._loss_function,
+        )
+        self.best_model_pyro_params = self._init_initial_best_pyro_params()
+
+    def _init_initial_best_pyro_params(self) -> Dict[str, None]:
+        return dict.fromkeys(self.metrics)
+
+    def _update_best_models(self, result: Dict[str, float], model):
+        loss = result['loss']
+        if loss < self.best_metrics['loss']:
+            self.best_metrics['loss'] = loss
+            self.best_models['loss'] = model.state_dict()
+            self.best_model_pyro_params['loss'] = pyro.get_param_store()
+        for metric in self.score_metrics:
+            if result[metric] > self.best_metrics[metric]:
+                self.best_metrics[metric] = result[metric]
+                self.best_models[metric] = model.state_dict()
+                self.best_model_pyro_params[metric] = pyro.get_param_store()
+
+    def _format_best_pyro_param_keys(
+            self,
+            best_model_pyro_params_dict: Dict,
+    ) -> Dict:
+        return {
+            f'best_{metric}_model_pyro_params': model_state
+            for metric, model_state in best_model_pyro_params_dict.items()
+        }
+
+    def _format_output_results(self):
+        best_metrics = self._format_best_result_keys(self.best_metrics)
+        best_model_dict = self._format_best_model_keys(self.best_models)
+        best_model_param_dict = self._format_best_pyro_param_keys(
+            self.best_model_pyro_params)
+        return {
+            **best_metrics,
+            **best_model_dict,
+            **best_model_param_dict,
+        }
 
     def _get_optimizer(self, model):
         return pyro.optim.ClippedAdam({"lr": 1e-3})

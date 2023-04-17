@@ -48,9 +48,9 @@ class PyroImageClassifier(ImageClassifier):
     def pyro_state_dict_key(self) -> str:
         return 'pyro_state_dict'
 
-    def save_model(self, result_dict: Dict):
-        result_dict[self.pyro_state_dict_key] = pyro.get_param_store()
-        super().save_model(result_dict)
+    # def save_model(self, result_dict: Dict):
+    #     result_dict[self.pyro_state_dict_key] = pyro.get_param_store()
+    #     super().save_model(result_dict)
 
     def _load_model(self, model_state_dict: dict, pyro_state_dict):
         pyro.clear_param_store()
