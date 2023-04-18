@@ -19,9 +19,9 @@ class Densenet121CnnClassifier(CnnImageClassifier):
     def model_creator_class(self) -> Type[ModelCreator]:
         return Densenet121CnnCreator
 
-    def unfreeze_fc_layer(self):
-        self.unfreeze_layer('fc')
+    def unfreeze_classifier_layer(self):
+        self.unfreeze_layer('classifier')
 
     def freeze_all_layers_except_fc(self):
         self.freeze_all_layers()
-        self.unfreeze_fc_layer()
+        self.unfreeze_classifier_layer()
