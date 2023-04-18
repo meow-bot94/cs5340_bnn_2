@@ -11,7 +11,7 @@ from src.scoring.epoch_score_printer import EpochScorePrinter
 
 class CnnTrainer(ModelTrainer):
     def _get_optimizer(self, model):
-        return optim.Adam(model.parameters())
+        return optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
 
     def get_optimizer(self):
         return self._get_optimizer(self._model)
