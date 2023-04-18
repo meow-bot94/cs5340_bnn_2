@@ -84,10 +84,23 @@ class ImageClassifier(ABC):
         self._load_model(*args, **kwargs)
         return self
 
+    @property
+    def net(self):
+        raise NotImplementedError(
+            'This pyro model has no underlying NN defined'
+        )
+
+    def unfreeze_layer(self, layer_name: str):
+        target_layer = self.net
+        for layer_section in layer_name.split('.'):
+            target_layer = getattr(target_layer, layer_section)
+        for param in target_layer.parameters():
+            param.requires_grad = True
+
     def freeze_all_layers(self):
-        for param in self._model.parameters():
+        for param in self.net.parameters():
             param.requires_grad = False
 
     def unfreeze_all_layers(self):
-        for param in self._model.parameters():
+        for param in self.net.parameters():
             param.requires_grad = True

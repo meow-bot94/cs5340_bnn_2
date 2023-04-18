@@ -27,9 +27,6 @@ class PyroDensenet121BnnClassifier(PyroImageClassifier):
     def num_samples(self) -> int:
         return 10
 
-    def unfreeze_layer(self, layer_name: str):
-        target_layer = self._model._net
-        for layer_section in layer_name.split('.'):
-            target_layer = getattr(target_layer, layer_section)
-        for param in target_layer.parameters():
-            param.requires_grad = True
+    @property
+    def net(self):
+        return self._model._net
