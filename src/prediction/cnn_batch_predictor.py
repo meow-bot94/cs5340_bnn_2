@@ -22,7 +22,7 @@ class CnnBatchPredictor(ModelPredictor):
             X_batch, y_batch = X_batch.to(device), y_batch.to(device)
 
             logits = model(X_batch)
-            log_probs = nn.functional.log_softmax(logits, dim=0)
+            log_probs = nn.functional.log_softmax(logits, dim=1)
             y_batch_pred = torch.argmax(log_probs, dim=1)
             y_true += list(y_batch.cpu())
             y_pred += list(y_batch_pred.cpu())
