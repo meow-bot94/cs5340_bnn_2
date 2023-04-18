@@ -10,14 +10,22 @@ normalize = transforms.Normalize(
     [0.229, 0.224, 0.225],
 )  # Imagenet standards
 
+auto_augment = transforms.AutoAugment(transforms.AutoAugmentPolicy.IMAGENET)
+
+fast_transform = transforms.Compose([
+    auto_augment,
+    transforms.ToTensor(),
+])
+
 # Image transformations
 image_transforms = {
     # Train uses data augmentation
     'train':
+        # fast_transform,
         transforms.Compose([
+            transforms.RandomResizedCrop(size=256, scale=(0.8, 1.0)),
             transforms.Resize((224, 224), antialias=True),
-            # transforms.RandomResizedCrop(size=256, scale=(0.8, 1.0)),
-            transforms.RandomResizedCrop(size=224),
+            # transforms.RandomResizedCrop(size=224),
             # transforms.RandomRotation(degrees=15),
             # transforms.ColorJitter(),
             transforms.RandomHorizontalFlip(),
@@ -28,18 +36,20 @@ image_transforms = {
             normalize,
         ]),
     'test':
+        # fast_transform,
         transforms.Compose([
             transforms.Resize((224, 224), antialias=True),
             # transforms.Resize(size=256),
-            transforms.CenterCrop(size=224),
+            # transforms.CenterCrop(size=224),
             transforms.ToTensor(),
             normalize
         ]),
     'validate':
+        # fast_transform,
         transforms.Compose([
             transforms.Resize((224, 224), antialias=True),
             # transforms.Resize(size=256),
-            transforms.CenterCrop(size=224),
+            # transforms.CenterCrop(size=224),
             transforms.ToTensor(),
             normalize
         ]),
