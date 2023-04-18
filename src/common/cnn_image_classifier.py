@@ -6,13 +6,14 @@ from src.training.cnn_trainer import CnnTrainer
 
 
 class CnnImageClassifier(ImageClassifier):
-    def _fit(self, num_epoch: int, verbose):
+    def _fit(self, num_epoch: int, optimizer, verbose):
         assert self._model is not None, 'Model not initiated. Run init first.'
         trainer = CnnTrainer(
             self._model,
             self._dataset,
             self._get_loss_criterion(),
             self._device,
+            optimizer=optimizer,
         )
         return trainer.train(num_epoch, verbose)
 

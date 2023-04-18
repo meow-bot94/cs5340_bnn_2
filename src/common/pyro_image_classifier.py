@@ -17,7 +17,7 @@ class PyroImageClassifier(ImageClassifier):
     def num_samples(self) -> int:
         return 1
 
-    def _fit(self, num_epoch: int, verbose):
+    def _fit(self, num_epoch: int, optimizer, verbose):
         assert self._model is not None, 'Model not initiated. Run init first.'
         pyro.clear_param_store()
         trainer = PyroBnnTrainer(
@@ -26,10 +26,19 @@ class PyroImageClassifier(ImageClassifier):
             self.num_samples,
             self._get_loss_criterion(),
             self._device,
+            optimizer=optimizer,
         )
         return trainer.train(num_epoch, verbose)
 
     def predict(self, dataloader: DataLoader):
+        return PyroBnnBatchPredictor(
+            self._model,
+            dataloader,
+            self.num_samples,
+            self._device,
+        ).predict()
+
+    def predict_probabilities(self, dataloader: DataLoader):
         return PyroBnnBatchPredictor(
             self._model,
             dataloader,

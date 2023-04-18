@@ -1,3 +1,4 @@
+import copy
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
 
@@ -11,11 +12,19 @@ from src.scoring.epoch_score_printer import EpochScorePrinter
 
 
 class ModelTrainer(ABC):
-    def __init__(self, model, dataset: Dataset, loss_criterion, device: str):
+    def __init__(
+            self,
+            model,
+            dataset: Dataset,
+            loss_criterion,
+            device: str,
+            optimizer=None,
+    ):
         self._model = model
         self._dataset = dataset
         self._loss_criterion = loss_criterion
         self._device = device
+        self._optimizer = optimizer if optimizer is not None else self._get_optimizer(self._model)
         self._predictor = self._get_predictor(
             self._model, self._dataset.test_dataloader, self._device)
         self.best_metrics = self._init_best_metrics()
@@ -57,11 +66,11 @@ class ModelTrainer(ABC):
         loss = result['loss']
         if loss < self.best_metrics['loss']:
             self.best_metrics['loss'] = loss
-            self.best_models['loss'] = model.state_dict()
+            self.best_models['loss'] = copy.deepcopy(model.state_dict())
         for metric in self.score_metrics:
             if result[metric] > self.best_metrics[metric]:
                 self.best_metrics[metric] = result[metric]
-                self.best_models[metric] = model.state_dict()
+                self.best_models[metric] = copy.deepcopy(model.state_dict())
 
     def _format_best_result_keys(self, best_result_dict: Dict) -> Dict:
         return {
@@ -123,13 +132,12 @@ class ModelTrainer(ABC):
             num_epoch: int,
             verbose=True,
     ) -> Tuple[pd.DataFrame, Dict]:
-        optimizer = self._get_optimizer(self._model)
         return self._train(
             self._model,
             num_epoch,
             self._dataset.train_dataloader,
             self._dataset.test_dataloader,
-            optimizer,
+            self._optimizer,
             self._loss_criterion,
             self._device,
             verbose=verbose

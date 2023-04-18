@@ -53,11 +53,11 @@ class ImageClassifier(ABC):
         pass
 
     @abstractmethod
-    def _fit(self, num_epoch: int, verbose) -> Tuple[pd.DataFrame, Dict]:
+    def _fit(self, num_epoch: int, optimizer, verbose) -> Tuple[pd.DataFrame, Dict]:
         pass
 
-    def fit(self, num_epoch: int, verbose=True) -> Tuple[pd.DataFrame, Dict]:
-        return self._fit(num_epoch, verbose)
+    def fit(self, num_epoch: int, optimizer=None, verbose=True) -> Tuple[pd.DataFrame, Dict]:
+        return self._fit(num_epoch, optimizer, verbose)
 
     @abstractmethod
     def predict(self, dataloader: DataLoader):
