@@ -53,24 +53,25 @@ class PyroBnnBatchPredictor(ModelPredictor):
 
     def _get_probabilities(
             self,
-            model, dataloader, likelihood, guide, num_samples, device,
+            model, x, likelihood, guide, num_samples, device,
     ) -> torch.tensor:
-        prediction_list = []
+        if x.dim() == 3:
+            x_batch = torch.tensor([x]).to(device)
+        elif x.dim() == 4:
+            x_batch = x.to(device)
+        else:
+            raise NotImplementedError(f'x dimension is not allowed: {x.dim()=}')
 
         model.eval()
-        for X_batch, y_batch in dataloader:
-            X_batch, y_batch = X_batch.to(device), y_batch.to(device)
+        prediction = self._get_prediction(
+            x_batch, likelihood, guide, num_samples)
 
-            prediction = self._get_prediction(
-                X_batch, likelihood, guide, num_samples)
-            prediction_list.append(prediction)
+        return prediction
 
-        return torch.concat(prediction_list)
-
-    def get_proba(self) -> torch.tensor:
+    def get_proba(self, x: torch.tensor) -> torch.tensor:
         return self._get_probabilities(
             self._model,
-            self._dataloader,
+            x,
             self._model.model,
             self._model.guide,
             self._num_samples,

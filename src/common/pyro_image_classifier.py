@@ -2,6 +2,7 @@ from abc import abstractmethod
 from typing import Dict
 
 import pyro
+import torch
 from torch.utils.data import DataLoader
 
 from src.common.image_classifier import ImageClassifier
@@ -38,13 +39,13 @@ class PyroImageClassifier(ImageClassifier):
             self._device,
         ).predict()
 
-    def predict_probabilities(self, dataloader: DataLoader):
+    def predict_probabilities(self, x: torch.tensor):
         return PyroBnnBatchPredictor(
             self._model,
-            dataloader,
+            None,
             self.num_samples,
             self._device,
-        ).predict()
+        ).get_proba(x)
 
     def _init_pyro_with_dummy_eval(self, model, dataloader, device):
         return PyroDummyEvaluationInitializer(
