@@ -1,5 +1,6 @@
 from typing import List, Tuple
 
+import torch
 from pyro.infer import Predictive
 
 from src.common.model_predictor import ModelPredictor
@@ -49,6 +50,32 @@ class PyroBnnBatchPredictor(ModelPredictor):
             y_pred += list(best_prediction.flatten().tolist())
 
         return y_true, y_pred
+
+    def _get_probabilities(
+            self,
+            model, dataloader, likelihood, guide, num_samples, device,
+    ) -> torch.tensor:
+        prediction_list = []
+
+        model.eval()
+        for X_batch, y_batch in dataloader:
+            X_batch, y_batch = X_batch.to(device), y_batch.to(device)
+
+            prediction = self._get_prediction(
+                X_batch, likelihood, guide, num_samples)
+            prediction_list.append(prediction)
+
+        return torch.concat(prediction_list)
+
+    def get_proba(self) -> torch.tensor:
+        return self._get_probabilities(
+            self._model,
+            self._dataloader,
+            self._model.model,
+            self._model.guide,
+            self._num_samples,
+            self._device,
+        )
 
     def predict(self):
         return self._predict(
