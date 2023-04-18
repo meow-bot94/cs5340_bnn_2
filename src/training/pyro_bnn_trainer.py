@@ -1,3 +1,4 @@
+import copy
 from typing import Dict
 
 import pyro
@@ -16,9 +17,10 @@ class PyroBnnTrainer(ModelTrainer):
             num_samples,
             loss_criterion,
             device: str,
+            optimizer=None,
     ):
         self._num_samples = num_samples
-        super().__init__(model, dataset, loss_criterion, device)
+        super().__init__(model, dataset, loss_criterion, device, optimizer)
         self._loss_function = loss_criterion
         self._loss_criterion = self._create_loss_criterion(
             self._model,
@@ -33,13 +35,13 @@ class PyroBnnTrainer(ModelTrainer):
         loss = result['loss']
         if loss < self.best_metrics['loss']:
             self.best_metrics['loss'] = loss
-            self.best_models['loss'] = model.state_dict()
-            self.best_model_pyro_params['loss'] = pyro.get_param_store()
+            self.best_models['loss'] = copy.deepcopy(model.state_dict())
+            self.best_model_pyro_params['loss'] = copy.deepcopy(pyro.get_param_store())
         for metric in self.score_metrics:
             if result[metric] > self.best_metrics[metric]:
                 self.best_metrics[metric] = result[metric]
-                self.best_models[metric] = model.state_dict()
-                self.best_model_pyro_params[metric] = pyro.get_param_store()
+                self.best_models[metric] = copy.deepcopy(model.state_dict())
+                self.best_model_pyro_params[metric] = copy.deepcopy(pyro.get_param_store())
 
     def _format_best_pyro_param_keys(
             self,
@@ -62,7 +64,7 @@ class PyroBnnTrainer(ModelTrainer):
         }
 
     def _get_optimizer(self, model):
-        return pyro.optim.ClippedAdam({"lr": 1e-3})
+        return pyro.optim.ClippedAdam({"lr": 1e-3, })
 
     def get_optimizer(self):
         return self._get_optimizer(self._model)

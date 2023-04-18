@@ -1,12 +1,8 @@
-from typing import Dict, Tuple
-
-import pandas as pd
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
 from src.common.model_trainer import ModelTrainer
 from src.prediction.cnn_batch_predictor import CnnBatchPredictor
-from src.scoring.epoch_score_printer import EpochScorePrinter
 
 
 class CnnTrainer(ModelTrainer):
@@ -22,9 +18,9 @@ class CnnTrainer(ModelTrainer):
         )
 
     def _train_epoch(self, model, loader, optimizer, criterion, device: str):
-
         # Initialize epoch loss (cumulative loss of all batch)
         epoch_loss = 0.0
+        optimizer.zero_grad()
 
         model.train()
         for X_batch, y_batch in loader:
