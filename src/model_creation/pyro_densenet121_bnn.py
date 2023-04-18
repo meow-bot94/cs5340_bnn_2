@@ -47,7 +47,7 @@ class PyroDensenet121Bnn(pyro.nn.PyroModule):
         net.idx_to_class = dataset.idx_to_class
         net.classifier = nn.Sequential(
             nn.Linear(
-                net.fc.in_features,
+                net.classifier.in_features,
                 dataset.num_classes,
                 bias=True,
             )
