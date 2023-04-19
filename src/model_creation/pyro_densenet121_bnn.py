@@ -52,7 +52,7 @@ class PyroDensenet121Bnn(pyro.nn.PyroModule):
         )
         net.add_module('softmax', nn.Softmax(dim=-1))
         net.classifier.requires_grad = True
-        net.logsoftmax.requires_grad = True
+        net.softmax.requires_grad = True
         net.to(device)
         return net
 
