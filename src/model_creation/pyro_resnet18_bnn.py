@@ -19,14 +19,12 @@ class PyroResnet18Bnn(pyro.nn.PyroModule):
 
     def forward(self, x, y=None):
         logits = self._resnet(x)
-        with pyro.plate("data_plate", x.shape[0]):
-            pyro.sample("data", Categorical(logits=logits).to_event(), obs=y)
+        pyro.sample("data", Categorical(logits=logits).to_event(), obs=y)
         return logits
 
     def model(self, x, y=None):
         logits = self._resnet(x)
-        with pyro.plate("data_plate", x.shape[0]):
-            pyro.sample("data", Categorical(logits=logits).to_event(), obs=y)
+        pyro.sample("data", Categorical(logits=logits).to_event(), obs=y)
         return logits
 
     def _get_guide(self):
@@ -52,9 +50,9 @@ class PyroResnet18Bnn(pyro.nn.PyroModule):
                 bias=True,
             )
         )
-        resnet.add_module('logsoftmax', nn.LogSoftmax(dim=1))
+        resnet.add_module('softmax', nn.Softmax(dim=-1))
         resnet.fc.requires_grad = True
-        resnet.logsoftmax.requires_grad = True
+        resnet.softmax.requires_grad = True
         resnet.to(device)
         return resnet
 
