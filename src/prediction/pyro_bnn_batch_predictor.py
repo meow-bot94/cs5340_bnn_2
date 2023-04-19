@@ -1,6 +1,5 @@
 from typing import List, Tuple
 
-import torch
 from pyro.infer import Predictive
 
 from src.common.model_predictor import ModelPredictor
@@ -24,8 +23,8 @@ class PyroBnnBatchPredictor(ModelPredictor):
             likelihood,
             guide=guide,
             num_samples=num_samples,
-            return_sites=("obs", "_RETURN")
-        )  # "linear.weight"
+            return_sites=["_RETURN"]
+        )
         samples = predictive(x)
         predicted_classes = samples['_RETURN'].cpu().numpy()
         return predicted_classes
@@ -50,33 +49,6 @@ class PyroBnnBatchPredictor(ModelPredictor):
             y_pred += list(best_prediction.flatten().tolist())
 
         return y_true, y_pred
-
-    def _get_probabilities(
-            self,
-            model, x, likelihood, guide, num_samples, device,
-    ) -> torch.tensor:
-        if x.dim() == 3:
-            x_batch = torch.tensor([x]).to(device)
-        elif x.dim() == 4:
-            x_batch = x.to(device)
-        else:
-            raise NotImplementedError(f'x dimension is not allowed: {x.dim()=}')
-
-        model.eval()
-        prediction = self._get_prediction(
-            x_batch, likelihood, guide, num_samples)
-
-        return prediction
-
-    def get_proba(self, x: torch.tensor) -> torch.tensor:
-        return self._get_probabilities(
-            self._model,
-            x,
-            self._model.model,
-            self._model.guide,
-            self._num_samples,
-            self._device,
-        )
 
     def predict(self):
         return self._predict(

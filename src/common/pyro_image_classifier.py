@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 
 from src.common.image_classifier import ImageClassifier
 from src.prediction.pyro_bnn_batch_predictor import PyroBnnBatchPredictor
+from src.prediction.pyro_bnn_proba_predictor import PyroBnnProbaPredictor
 from src.pyro.pyro_dummy_evaluation_initializer import \
     PyroDummyEvaluationInitializer
 from src.training.pyro_bnn_trainer import PyroBnnTrainer
@@ -39,13 +40,13 @@ class PyroImageClassifier(ImageClassifier):
             self._device,
         ).predict()
 
-    def predict_probabilities(self, x: torch.tensor):
-        return PyroBnnBatchPredictor(
+    def predict_probabilities(self, x: torch.tensor, num_samples: int = None):
+        if num_samples is None:
+            num_samples = self.num_samples
+        return PyroBnnProbaPredictor(
             self._model,
-            None,
-            self.num_samples,
             self._device,
-        ).get_proba(x)
+        ).get_proba(x, num_samples)
 
     def _init_pyro_with_dummy_eval(self, model, dataloader, device):
         return PyroDummyEvaluationInitializer(
